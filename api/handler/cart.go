@@ -76,8 +76,37 @@ func changeCartName(svc cart.Service) http.Handler {
 	})
 }
 
+func showMyCarts(svc cart.Service) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			view.Wrap(view.ErrMethodNotAllowed, w)
+			return
+		}
+
+		claims, err := middleware.ValidateAndGetClaims(r.Context(), "user")
+		if err != nil {
+			view.Wrap(err, w)
+			return
+		}
+
+		carts, err := svc.GetCarts(claims["id"].(string))
+		if err != nil {
+			view.Wrap(err, w)
+			return
+		}
+
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "Carts Fetched",
+			"carts":   carts,
+		})
+	})
+}
+
 // Handler
 func MakeCartHandler(r *http.ServeMux, svc cart.Service) {
 	r.Handle("/api/cart/create", middleware.Validate(createCart(svc)))
 	r.Handle("/api/cart/changename", middleware.Validate(changeCartName(svc)))
+	r.Handle("/api/cart/showmycarts", middleware.Validate(showMyCarts(svc)))
 }
