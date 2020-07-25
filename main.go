@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
 	"github.com/rithikjain/quickscan-backend/api/handler"
 	"github.com/rithikjain/quickscan-backend/pkg/entities"
