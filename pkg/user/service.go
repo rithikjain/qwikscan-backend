@@ -16,6 +16,8 @@ type Service interface {
 
 	GetUserByEmail(email string) (*entities.User, error)
 
+	GetUserByUUID(uuid string) (*entities.User, error)
+
 	GetRepo() Repository
 }
 
@@ -81,6 +83,10 @@ func (s *service) GetUserByID(id float64) (*entities.User, error) {
 
 func (s *service) GetUserByEmail(email string) (*entities.User, error) {
 	return s.repo.FindByEmail(email)
+}
+
+func (s *service) GetUserByUUID(uuid string) (*entities.User, error) {
+	return s.repo.FindByUUID(uuid)
 }
 
 func (s *service) GetRepo() Repository {

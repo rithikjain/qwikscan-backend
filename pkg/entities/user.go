@@ -4,6 +4,7 @@ import "github.com/jinzhu/gorm"
 
 type User struct {
 	gorm.Model
+	UUID        string `json:"id omitempty"`
 	Name        string `json:"name"`
 	Email       string `json:"email"`
 	Password    string `json:"password"`

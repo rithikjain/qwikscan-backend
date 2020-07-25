@@ -11,6 +11,8 @@ type Repository interface {
 
 	FindByEmail(email string) (*entities.User, error)
 
+	FindByUUID(uuid string) (*entities.User, error)
+
 	Register(user *entities.User) (*entities.User, error)
 
 	DoesEmailExist(email string) (bool, error)
@@ -54,6 +56,16 @@ func (r *repo) DoesEmailExist(email string) (bool, error) {
 func (r *repo) FindByEmail(email string) (*entities.User, error) {
 	user := &entities.User{}
 	result := r.DB.Where("email = ?", email).First(user)
+
+	if result.Error == gorm.ErrRecordNotFound {
+		return nil, pkg.ErrNotFound
+	}
+	return user, nil
+}
+
+func (r *repo) FindByUUID(uuid string) (*entities.User, error) {
+	user := &entities.User{}
+	result := r.DB.Where("uuid = ?", uuid).First(user)
 
 	if result.Error == gorm.ErrRecordNotFound {
 		return nil, pkg.ErrNotFound

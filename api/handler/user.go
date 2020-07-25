@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
+	uuid2 "github.com/nu7hatch/gouuid"
 	"github.com/rithikjain/quickscan-backend/api/middleware"
 	"github.com/rithikjain/quickscan-backend/api/view"
 	"github.com/rithikjain/quickscan-backend/pkg/entities"
@@ -24,6 +25,13 @@ func register(svc user.Service) http.Handler {
 			return
 		}
 
+		uuid, err := uuid2.NewV4()
+		if err != nil {
+			view.Wrap(err, w)
+			return
+		}
+		user.UUID = uuid.String()
+
 		u, err := svc.Register(&user)
 		if err != nil {
 			view.Wrap(err, w)
@@ -32,8 +40,8 @@ func register(svc user.Service) http.Handler {
 
 		// Handling JWT
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"email": u.Email,
-			"role":  "user",
+			"id":   u.UUID,
+			"role": "user",
 		})
 		tokenString, err := token.SignedString([]byte(os.Getenv("jwt_secret")))
 		if err != nil {
@@ -70,8 +78,8 @@ func login(svc user.Service) http.Handler {
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"email": u.Email,
-			"role":  "user",
+			"id":   u.UUID,
+			"role": "user",
 		})
 		tokenString, err := token.SignedString([]byte(os.Getenv("jwt_secret")))
 		if err != nil {
@@ -101,7 +109,7 @@ func userDetails(svc user.Service) http.Handler {
 			view.Wrap(err, w)
 			return
 		}
-		u, err := svc.GetUserByEmail(claims["email"].(string))
+		u, err := svc.GetUserByUUID(claims["id"].(string))
 		if err != nil {
 			view.Wrap(err, w)
 			return
