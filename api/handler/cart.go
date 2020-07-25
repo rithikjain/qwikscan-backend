@@ -164,6 +164,60 @@ func updateItemCount(svc cart.Service) http.Handler {
 	})
 }
 
+func deleteItem(svc cart.Service) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			view.Wrap(view.ErrMethodNotAllowed, w)
+			return
+		}
+
+		type Req struct {
+			ItemID string `json:"item_id"`
+		}
+		var req Req
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			view.Wrap(err, w)
+			return
+		}
+
+		err := svc.DeleteCartItem(req.ItemID)
+		if err != nil {
+			view.Wrap(err, w)
+			return
+		}
+
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "Item Deleted",
+		})
+	})
+}
+
+func showItems(svc cart.Service) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			view.Wrap(view.ErrMethodNotAllowed, w)
+			return
+		}
+
+		cartID := r.URL.Query().Get("cart_id")
+
+		items, err := svc.GetCartItems(cartID)
+		if err != nil {
+			view.Wrap(err, w)
+			return
+		}
+
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "Items Fetched",
+			"items":   items,
+		})
+	})
+}
+
 // Handler
 func MakeCartHandler(r *http.ServeMux, svc cart.Service) {
 	r.Handle("/api/cart/create", middleware.Validate(createCart(svc)))
@@ -171,4 +225,6 @@ func MakeCartHandler(r *http.ServeMux, svc cart.Service) {
 	r.Handle("/api/cart/showmycarts", middleware.Validate(showMyCarts(svc)))
 	r.Handle("/api/cart/additem", middleware.Validate(createItem(svc)))
 	r.Handle("/api/cart/updateitemcount", middleware.Validate(updateItemCount(svc)))
+	r.Handle("/api/cart/deleteitem", middleware.Validate(deleteItem(svc)))
+	r.Handle("/api/cart/showitems", middleware.Validate(showItems(svc)))
 }
