@@ -132,10 +132,43 @@ func createItem(svc cart.Service) http.Handler {
 	})
 }
 
+func updateItemCount(svc cart.Service) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			view.Wrap(view.ErrMethodNotAllowed, w)
+			return
+		}
+
+		type Req struct {
+			ItemID   string `json:"item_id"`
+			NewCount int    `json:"new_count"`
+		}
+		var req Req
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			view.Wrap(err, w)
+			return
+		}
+
+		c, err := svc.UpdateCartItemCount(req.ItemID, req.NewCount)
+		if err != nil {
+			view.Wrap(err, w)
+			return
+		}
+
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "Cart Item Count Updated",
+			"cart":    c,
+		})
+	})
+}
+
 // Handler
 func MakeCartHandler(r *http.ServeMux, svc cart.Service) {
 	r.Handle("/api/cart/create", middleware.Validate(createCart(svc)))
 	r.Handle("/api/cart/changename", middleware.Validate(changeCartName(svc)))
 	r.Handle("/api/cart/showmycarts", middleware.Validate(showMyCarts(svc)))
 	r.Handle("/api/cart/additem", middleware.Validate(createItem(svc)))
+	r.Handle("/api/cart/updateitemcount", middleware.Validate(updateItemCount(svc)))
 }
