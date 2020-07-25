@@ -209,11 +209,17 @@ func showItems(svc cart.Service) http.Handler {
 			return
 		}
 
+		var total = 0
+		for _, item := range *items {
+			total += item.ItemPrice * item.ItemQuantity
+		}
+
 		w.Header().Add("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"message": "Items Fetched",
-			"items":   items,
+			"message":     "Items Fetched",
+			"items":       items,
+			"total_price": total,
 		})
 	})
 }
