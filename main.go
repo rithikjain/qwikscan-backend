@@ -6,6 +6,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
 	"github.com/rithikjain/quickscan-backend/api/handler"
+	"github.com/rithikjain/quickscan-backend/pkg/cart"
 	"github.com/rithikjain/quickscan-backend/pkg/entities"
 	"github.com/rithikjain/quickscan-backend/pkg/user"
 	"log"
@@ -59,6 +60,8 @@ func main() {
 
 	// Creating the tables
 	db.AutoMigrate(&entities.User{})
+	db.AutoMigrate(&entities.Cart{})
+	db.AutoMigrate(&entities.Cart{})
 
 	defer db.Close()
 	fmt.Println("Connected to DB...")
@@ -70,6 +73,11 @@ func main() {
 	userRepo := user.NewRepo(db)
 	userSvc := user.NewService(userRepo)
 	handler.MakeUserHandler(r, userSvc)
+
+	// Cart
+	cartRepo := cart.NewRepo(db)
+	cartSvc := cart.NewService(cartRepo)
+	handler.MakeCartHandler(r, cartSvc)
 
 	// To check if server up or not
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
