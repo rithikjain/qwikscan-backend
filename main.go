@@ -61,7 +61,7 @@ func main() {
 	// Creating the tables
 	db.AutoMigrate(&entities.User{})
 	db.AutoMigrate(&entities.Cart{})
-	db.AutoMigrate(&entities.Cart{})
+	db.AutoMigrate(&entities.CartItem{})
 
 	defer db.Close()
 	fmt.Println("Connected to DB...")

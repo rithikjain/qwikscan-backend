@@ -104,9 +104,38 @@ func showMyCarts(svc cart.Service) http.Handler {
 	})
 }
 
+func createItem(svc cart.Service) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			view.Wrap(view.ErrMethodNotAllowed, w)
+			return
+		}
+
+		var cartItem entities.CartItem
+		if err := json.NewDecoder(r.Body).Decode(&cartItem); err != nil {
+			view.Wrap(err, w)
+			return
+		}
+
+		ci, err := svc.CreateCartItem(&cartItem)
+		if err != nil {
+			view.Wrap(err, w)
+			return
+		}
+
+		w.Header().Add("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusCreated)
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "Item Created",
+			"carts":   ci,
+		})
+	})
+}
+
 // Handler
 func MakeCartHandler(r *http.ServeMux, svc cart.Service) {
 	r.Handle("/api/cart/create", middleware.Validate(createCart(svc)))
 	r.Handle("/api/cart/changename", middleware.Validate(changeCartName(svc)))
 	r.Handle("/api/cart/showmycarts", middleware.Validate(showMyCarts(svc)))
+	r.Handle("/api/cart/additem", middleware.Validate(createItem(svc)))
 }
