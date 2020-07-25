@@ -32,8 +32,8 @@ func register(svc user.Service) http.Handler {
 
 		// Handling JWT
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"id":   u.Email,
-			"role": "user",
+			"email": u.Email,
+			"role":  "user",
 		})
 		tokenString, err := token.SignedString([]byte(os.Getenv("jwt_secret")))
 		if err != nil {
@@ -70,8 +70,8 @@ func login(svc user.Service) http.Handler {
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"id":   u.ID,
-			"role": "user",
+			"email": u.Email,
+			"role":  "user",
 		})
 		tokenString, err := token.SignedString([]byte(os.Getenv("jwt_secret")))
 		if err != nil {
@@ -101,7 +101,7 @@ func userDetails(svc user.Service) http.Handler {
 			view.Wrap(err, w)
 			return
 		}
-		u, err := svc.GetUserByID(claims["id"].(float64))
+		u, err := svc.GetUserByEmail(claims["email"].(string))
 		if err != nil {
 			view.Wrap(err, w)
 			return
