@@ -1,4 +1,4 @@
-package quickscan_backend
+package main
 
 import (
 	"fmt"
