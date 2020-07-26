@@ -232,5 +232,5 @@ func MakeCartHandler(r *http.ServeMux, svc cart.Service) {
 	r.Handle("/api/cart/additem", middleware.Validate(createItem(svc)))
 	r.Handle("/api/cart/updateitemcount", middleware.Validate(updateItemCount(svc)))
 	r.Handle("/api/cart/deleteitem", middleware.Validate(deleteItem(svc)))
-	r.Handle("/api/cart/showitems", middleware.Validate(showItems(svc)))
+	r.Handle("/api/cart/showitems", showItems(svc))
 }
