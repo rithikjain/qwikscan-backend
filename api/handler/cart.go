@@ -127,7 +127,7 @@ func createItem(svc cart.Service) http.Handler {
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"message": "Item Created",
-			"carts":   ci,
+			"item":    ci,
 		})
 	})
 }
@@ -159,7 +159,7 @@ func updateItemCount(svc cart.Service) http.Handler {
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"message": "Cart Item Count Updated",
-			"cart":    c,
+			"item":    c,
 		})
 	})
 }
